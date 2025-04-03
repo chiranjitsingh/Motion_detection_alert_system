@@ -1,31 +1,35 @@
-
 import cv2
 import numpy as np
 import time
 import os
 from datetime import datetime
+from dotenv import load_dotenv
 from twilio.rest import Client
 
-# Twilio WhatsApp API Configuration
-TWILIO_SID = "AC49a96e047a00af61c5fbc85e29a350e5"  # Replace with your Twilio SID
-TWILIO_AUTH_TOKEN = "926525a3f55a66f0cf990059edb052ee"  # Replace with your Twilio Auth Token
-TWILIO_WHATSAPP_NUMBER = "whatsapp:+14155238886"  # Twilio Sandbox Number
-RECIPIENT_WHATSAPP_NUMBER = "whatsapp:+919465516145"  # Replace with recipient's number
+# Load environment variables from .env
+load_dotenv()
 
+# Twilio WhatsApp API Configuration
+TWILIO_SID = os.getenv("TWILIO_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
+RECIPIENT_WHATSAPP_NUMBER = os.getenv("RECIPIENT_WHATSAPP_NUMBER")
+
+# Initialize Twilio Client
 client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
 
 # Create the "recorded_videos" folder if it doesn't exist
 RECORDINGS_FOLDER = "recorded_videos"
 os.makedirs(RECORDINGS_FOLDER, exist_ok=True)
 
-# Cooldown period for alerts (5 minutes = 300 seconds)
-ALERT_COOLDOWN = 300
-last_alert_time = 0
+# Alert and Recording Settings
+ALERT_COOLDOWN = int(os.getenv("ALERT_COOLDOWN", 300))  # Default: 5 min
+MOTION_RECORD_DURATION = int(os.getenv("MOTION_RECORD_DURATION", 60))  # Default: 60 sec
 
-MOTION_RECORD_DURATION = 60  # Record for 60 seconds
+last_alert_time = 0  # Track last alert time
 
 def send_whatsapp_alert():
-    """Send a WhatsApp alert message automatically using Twilio API."""
+    """Send a WhatsApp alert message using Twilio API."""
     global last_alert_time
     current_time = time.time()
 
@@ -43,7 +47,7 @@ def send_whatsapp_alert():
             print("❌ Error sending WhatsApp alert:", e)
 
 def motion_detection():
-    """Motion detection function with automatic WhatsApp alerts and 1-minute video recording."""
+    """Motion detection function with automatic WhatsApp alerts and video recording."""
     cap = cv2.VideoCapture(0)
     ret, frame1 = cap.read()
     ret, frame2 = cap.read()
@@ -51,7 +55,7 @@ def motion_detection():
     motion_detected = False
     video_writer = None
     video_filename = ""
-    record_start_time = None  # Track recording start time
+    record_start_time = None
 
     while cap.isOpened():
         diff = cv2.absdiff(frame1, frame2)
@@ -82,7 +86,7 @@ def motion_detection():
         if motion_detected and video_writer:
             video_writer.write(frame1)
 
-            # Stop recording after 1 minute
+            # Stop recording after set duration
             if time.time() - record_start_time > MOTION_RECORD_DURATION:
                 motion_detected = False
                 video_writer.release()
@@ -92,12 +96,12 @@ def motion_detection():
         frame1 = frame2
         ret, frame2 = cap.read()
 
-        if cv2.waitKey(10) == 27:
+        if cv2.waitKey(10) == 27:  # Press 'Esc' to exit
             break
 
     if motion_detected and video_writer:
         video_writer.release()
-    
+
     cap.release()
     cv2.destroyAllWindows()
 

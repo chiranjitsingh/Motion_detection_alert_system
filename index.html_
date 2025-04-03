@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Surveillance System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #status {
+            font-size: 20px;
+            margin: 20px;
+            color: red;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            margin: 10px;
+        }
+        .start { background-color: green; color: white; }
+        .stop { background-color: red; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Smart Surveillance System</h1>
+    <p id="status">System is <b>Inactive</b></p>
+    <button class="start" onclick="startSurveillance()">Start Surveillance</button>
+    <button class="stop" onclick="stopSurveillance()">Stop Surveillance</button>
+    <script>
+        function startSurveillance() {
+            fetch('/start', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("status").innerHTML = "System is <b style='color:green'>Active</b>";
+                    alert(data.message);
+                });
+        }
+
+        function stopSurveillance() {
+            fetch('/stop', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("status").innerHTML = "System is <b>Inactive</b>";
+                    alert(data.message);
+                });
+        }
+    </script>
+</body>
+</html>

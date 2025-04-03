@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Surveillance System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .status {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+        .start-btn {
+            background-color: green;
+        }
+        .stop-btn {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🚨 Smart Surveillance System</h1>
+    <p class="status">System Status: <b id="status">Inactive</b></p>
+
+    <button class="start-btn" onclick="startSurveillance()">Start Surveillance</button>
+    <button class="stop-btn" onclick="stopSurveillance()">Stop Surveillance</button>
+
+    <script>
+        function startSurveillance() {
+            fetch('http://127.0.0.1:5000/start', {  // Ensure correct backend URL
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())  // Convert response to JSON
+            .then(data => {
+                document.getElementById("status").innerHTML = "<b style='color:green'>Active</b>";
+                alert(data.message);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function stopSurveillance() {
+            fetch('http://127.0.0.1:5000/stop', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("status").innerHTML = "<b style='color:red'>Inactive</b>";
+                alert(data.message);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+</body>
+</html>
